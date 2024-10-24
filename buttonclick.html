@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Button Click Game</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        background-color: #f0f2f5;
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1.5rem;
       }
 
-      .container {
+      .box {
         background-color: white;
         border: 3px solid black;
         padding: 2rem;
@@ -25,10 +21,14 @@
         max-width: 900px;
       }
 
-      h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 1.5rem;
+      body {
+        display: flex;
+        font-family: Arial, sans-serif;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f2f5;
       }
 
       .stats {
@@ -63,10 +63,9 @@
 
       .click-area.active {
         border-color: #d21d1d;
-        background-color: #c4435d;
       }
 
-      .game-over {
+      .endgame {
         text-align: center;
       }
 
@@ -87,7 +86,7 @@
     </style>
   </head>
   <body>
-    <div class="container">
+    <div class="box">
       <h1 id="title">ButtonClick Game</h1>
       <div class="stats">
         <div>
@@ -158,7 +157,7 @@
 
         const finalCPS = (clicks / 10).toFixed(1);
         clickArea.innerHTML = `
-          <div class="game-over">
+          <div class="endgame">
             <h2>Game Over!</h2>
             <p>Final Score: ${clicks} clicks (${finalCPS} cps)</p>
             <button id="resetButton">Try Again...</button>
