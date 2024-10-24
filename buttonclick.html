@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Button Click Game</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f2f5;
+      }
+
+      .container {
+        background-color: white;
+        border: 3px solid black;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 30px 30px rgba(170, 22, 22, 0.1);
+        width: 90%;
+        max-width: 900px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1.5rem;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-family: monospace;
+        display: block;
+        text-align: center;
+        color: #0d0e11;
+      }
+
+      .click-area {
+        border: 3px solid black;
+        border-radius: 8px;
+        padding: 4rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background-color: white;
+      }
+
+      .click-area:hover {
+        border-color: #de3c3e;
+        background-color: #c4435d;
+      }
+
+      .click-area.active {
+        border-color: #d21d1d;
+        background-color: #c4435d;
+      }
+
+      .game-over {
+        text-align: center;
+      }
+
+      button {
+        background-color: #d59b2f;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 1rem;
+      }
+
+      button:hover {
+        background-color: #1d4ed8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="title">ButtonClick Game</h1>
+      <div class="stats">
+        <div>
+          <span class="stat-value" id="timeLeft">10</span>
+          secs
+        </div>
+        <div>
+          <span class="stat-value" id="cps">0.0</span>
+          cps
+        </div>
+        <div>
+          <span class="stat-value" id="clicks">0</span>
+          clicks
+        </div>
+      </div>
+      <div class="click-area" id="clickArea">Click here to begin...</div>
+    </div>
+
+    <script>
+      const clickArea = document.getElementById("clickArea");
+      const timeLeftDisplay = document.getElementById("timeLeft");
+      const cpsDisplay = document.getElementById("cps");
+      const clicksDisplay = document.getElementById("clicks");
+      const title = document.getElementById("title");
+
+      let gameState = "idle";
+      let timeLeft = 10;
+      let clicks = 0;
+      let timer = null;
+
+      function updateCPS() {
+        const elapsedTime = 10 - timeLeft;
+        const cps = elapsedTime > 0 ? (clicks / elapsedTime).toFixed(1) : "0.0";
+        cpsDisplay.textContent = cps;
+      }
+
+      function getRandomColor() {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      function startGame() {
+        gameState = "running";
+        timeLeft = 10;
+        clicks = 0;
+        clickArea.classList.add("active");
+        clickArea.textContent = "Click as fast as you can...";
+
+        timer = setInterval(() => {
+          timeLeft--;
+          timeLeftDisplay.textContent = timeLeft;
+          updateCPS();
+
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+
+      function endGame() {
+        clearInterval(timer);
+        gameState = "finished";
+        clickArea.classList.remove("active");
+
+        const finalCPS = (clicks / 10).toFixed(1);
+        clickArea.innerHTML = `
+          <div class="game-over">
+            <h2>Game Over!</h2>
+            <p>Final Score: ${clicks} clicks (${finalCPS} cps)</p>
+            <button id="resetButton">Try Again...</button>
+          </div>
+        `;
+
+        // Add event listener to the reset button
+        document
+          .getElementById("resetButton")
+          .addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent the click from bubbling up to clickArea
+            resetGame();
+          });
+      }
+
+      function resetGame() {
+        // Clear any existing intervals just in case
+        clearInterval(timer);
+
+        // Reset game state
+        gameState = "idle";
+        timeLeft = 10;
+        clicks = 0;
+
+        // Reset all displays
+        timeLeftDisplay.textContent = timeLeft;
+        cpsDisplay.textContent = "0.0";
+        clicksDisplay.textContent = clicks;
+
+        // Reset the click area to initial state
+        clickArea.innerHTML = "Click here to begin...";
+        clickArea.classList.remove("active");
+
+        // Reset title color
+        title.style.color = "#333";
+      }
+
+      // Main click event listener
+      clickArea.addEventListener("click", (e) => {
+        // Only handle clicks directly on the click area, not on buttons
+        if (e.target === clickArea) {
+          if (gameState === "idle") {
+            startGame();
+          }
+
+          if (gameState === "running") {
+            clicks++;
+            clicksDisplay.textContent = clicks;
+            updateCPS();
+            title.style.color = getRandomColor();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
