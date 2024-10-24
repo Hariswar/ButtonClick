@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Button Click Game</title>
+    <title>Click Game made by me</title>
+    <link rel="icon" type="image/avif" href="game.avif" />
     <style>
       h1 {
         text-align: center;
@@ -83,14 +84,34 @@
       button:hover {
         background-color: #1d4ed8;
       }
+
+      .header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #d21d1d;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
     </style>
   </head>
   <body>
+    <div class="header">
+      <a href="#" class="logo">🎮 ButtonClick</a>
+    </div>
+
     <div class="box">
       <h1 id="title">ButtonClick Game</h1>
       <div class="stats">
         <div>
-          <span class="stat-value" id="timeLeft">10</span>
+          <span class="stat-value" id="LeftoverTime">10</span>
           secs
         </div>
         <div>
@@ -102,23 +123,23 @@
           clicks
         </div>
       </div>
-      <div class="click-area" id="clickArea">Click here to begin...</div>
+      <div class="click-area" id="clickZone">Click here to begin...</div>
     </div>
 
     <script>
-      const clickArea = document.getElementById("clickArea");
-      const timeLeftDisplay = document.getElementById("timeLeft");
-      const cpsDisplay = document.getElementById("cps");
+      const RemainingTimeonDisplay = document.getElementById("LeftoverTime");
+      const clickZone = document.getElementById("clickZone");
       const clicksDisplay = document.getElementById("clicks");
+      const cpsDisplay = document.getElementById("cps");
       const title = document.getElementById("title");
 
       let gameState = "idle";
-      let timeLeft = 10;
+      let LeftoverTime = 10;
       let clicks = 0;
       let timer = null;
 
       function updateCPS() {
-        const elapsedTime = 10 - timeLeft;
+        const elapsedTime = 10 - LeftoverTime;
         const cps = elapsedTime > 0 ? (clicks / elapsedTime).toFixed(1) : "0.0";
         cpsDisplay.textContent = cps;
       }
@@ -134,17 +155,17 @@
 
       function startGame() {
         gameState = "running";
-        timeLeft = 10;
+        LeftoverTime = 10;
         clicks = 0;
-        clickArea.classList.add("active");
-        clickArea.textContent = "Click as fast as you can...";
+        clickZone.classList.add("active");
+        clickZone.textContent = "Click as fast as you can...";
 
         timer = setInterval(() => {
-          timeLeft--;
-          timeLeftDisplay.textContent = timeLeft;
+          LeftoverTime--;
+          RemainingTimeonDisplay.textContent = LeftoverTime;
           updateCPS();
 
-          if (timeLeft <= 0) {
+          if (LeftoverTime <= 0) {
             endGame();
           }
         }, 1000);
@@ -153,10 +174,10 @@
       function endGame() {
         clearInterval(timer);
         gameState = "finished";
-        clickArea.classList.remove("active");
+        clickZone.classList.remove("active");
 
         const finalCPS = (clicks / 10).toFixed(1);
-        clickArea.innerHTML = `
+        clickZone.innerHTML = `
           <div class="endgame">
             <h2>Game Over!</h2>
             <p>Final Score: ${clicks} clicks (${finalCPS} cps)</p>
@@ -176,21 +197,21 @@
         clearInterval(timer);
 
         gameState = "idle";
-        timeLeft = 10;
+        LeftoverTime = 10;
         clicks = 0;
 
-        timeLeftDisplay.textContent = timeLeft;
+        RemainingTimeonDisplay.textContent = LeftoverTime;
         cpsDisplay.textContent = "0.0";
         clicksDisplay.textContent = clicks;
 
-        clickArea.innerHTML = "Click here to begin...";
-        clickArea.classList.remove("active");
+        clickZone.innerHTML = "Click here to begin...";
+        clickZone.classList.remove("active");
 
         title.style.color = "#333";
       }
 
-      clickArea.addEventListener("click", (e) => {
-        if (e.target === clickArea) {
+      clickZone.addEventListener("click", (e) => {
+        if (e.target === clickZone) {
           if (gameState === "idle") {
             startGame();
           }
