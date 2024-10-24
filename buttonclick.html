@@ -165,40 +165,32 @@
           </div>
         `;
 
-        // Add event listener to the reset button
         document
           .getElementById("resetButton")
           .addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent the click from bubbling up to clickArea
+            e.stopPropagation();
             resetGame();
           });
       }
 
       function resetGame() {
-        // Clear any existing intervals just in case
         clearInterval(timer);
 
-        // Reset game state
         gameState = "idle";
         timeLeft = 10;
         clicks = 0;
 
-        // Reset all displays
         timeLeftDisplay.textContent = timeLeft;
         cpsDisplay.textContent = "0.0";
         clicksDisplay.textContent = clicks;
 
-        // Reset the click area to initial state
         clickArea.innerHTML = "Click here to begin...";
         clickArea.classList.remove("active");
 
-        // Reset title color
         title.style.color = "#333";
       }
 
-      // Main click event listener
       clickArea.addEventListener("click", (e) => {
-        // Only handle clicks directly on the click area, not on buttons
         if (e.target === clickArea) {
           if (gameState === "idle") {
             startGame();
