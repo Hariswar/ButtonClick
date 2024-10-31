@@ -1,1 +1,1 @@
-I developed a clicking game that gives you 5 options between 10,20,30,40,50 seconds in order to begin the cliciking. It will take count of how many clicks you have attempted in limited amount of time and also shows your cps in the result. 
+I developed a simple clicking game that gives you 5 options between 10,20,30,40,50 seconds in order to begin the cliciking. It will take count of how many clicks you have attempted in limited amount of time and also shows your cps in the result. 
