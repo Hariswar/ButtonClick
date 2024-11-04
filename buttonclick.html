@@ -78,7 +78,7 @@
         border-radius: 4px;
         cursor: pointer;
         font-size: 1rem;
-        margin-top: 1rem;
+        margin: 0.5rem;
       }
 
       button:hover {
@@ -100,6 +100,25 @@
         align-items: center;
         gap: 8px;
       }
+
+      .time-options {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .time-button {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        transition: all 0.2s;
+      }
+
+      .time-button.selected {
+        background-color: #1d4ed8;
+        transform: scale(1.1);
+      }
     </style>
   </head>
   <body>
@@ -109,6 +128,13 @@
 
     <div class="box">
       <h1 id="title">ButtonClick Game</h1>
+      <div class="time-options" id="timeOptions">
+        <button class="time-button selected" data-time="10">10 sec</button>
+        <button class="time-button" data-time="20">20 sec</button>
+        <button class="time-button" data-time="30">30 sec</button>
+        <button class="time-button" data-time="40">40 sec</button>
+        <button class="time-button" data-time="50">50 sec</button>
+      </div>
       <div class="stats">
         <div>
           <span class="stat-value" id="LeftoverTime">10</span>
@@ -132,14 +158,37 @@
       const clicksDisplay = document.getElementById("clicks");
       const cpsDisplay = document.getElementById("cps");
       const title = document.getElementById("title");
+      const timeOptions = document.getElementById("timeOptions");
 
       let gameState = "idle";
       let LeftoverTime = 10;
+      let totalTime = 10;
       let clicks = 0;
       let timer = null;
 
+      // Time selection functionality
+      timeOptions.addEventListener("click", (e) => {
+        if (
+          e.target.classList.contains("time-button") &&
+          gameState === "idle"
+        ) {
+          // Remove selected class from all buttons
+          document.querySelectorAll(".time-button").forEach((btn) => {
+            btn.classList.remove("selected");
+          });
+
+          // Add selected class to clicked button
+          e.target.classList.add("selected");
+
+          // Update time
+          totalTime = parseInt(e.target.dataset.time);
+          LeftoverTime = totalTime;
+          RemainingTimeonDisplay.textContent = LeftoverTime;
+        }
+      });
+
       function updateCPS() {
-        const elapsedTime = 10 - LeftoverTime;
+        const elapsedTime = totalTime - LeftoverTime;
         const cps = elapsedTime > 0 ? (clicks / elapsedTime).toFixed(1) : "0.0";
         cpsDisplay.textContent = cps;
       }
@@ -155,7 +204,8 @@
 
       function startGame() {
         gameState = "running";
-        LeftoverTime = 10;
+        timeOptions.style.display = "none";
+        LeftoverTime = totalTime;
         clicks = 0;
         clickZone.classList.add("active");
         clickZone.textContent = "Click as fast as you can...";
@@ -176,7 +226,7 @@
         gameState = "finished";
         clickZone.classList.remove("active");
 
-        const finalCPS = (clicks / 10).toFixed(1);
+        const finalCPS = (clicks / totalTime).toFixed(1);
         clickZone.innerHTML = `
           <div class="endgame">
             <h2>Game Over!</h2>
@@ -195,9 +245,10 @@
 
       function resetGame() {
         clearInterval(timer);
+        timeOptions.style.display = "flex";
 
         gameState = "idle";
-        LeftoverTime = 10;
+        LeftoverTime = totalTime;
         clicks = 0;
 
         RemainingTimeonDisplay.textContent = LeftoverTime;
