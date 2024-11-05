@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Click Game made by me</title>
-    <link rel="icon" type="image/avif" href="game.avif" />
     <style>
       h1 {
         text-align: center;
@@ -20,6 +19,7 @@
         box-shadow: 0 30px 30px rgba(170, 22, 22, 0.1);
         width: 90%;
         max-width: 900px;
+        position: relative;
       }
 
       body {
@@ -32,11 +32,102 @@
         background-color: #f0f2f5;
       }
 
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        position: relative;
+      }
+
+      .modal h2 {
+        color: green;
+        margin-top: 0;
+      }
+
+      .modal-content {
+        margin: 1.5rem 0;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+
+      .stat-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: green;
+      }
+
       .stats {
         display: flex;
         justify-content: space-around;
         margin-bottom: 2rem;
         font-size: 1.2rem;
+        position: relative;
+      }
+
+      .timer-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+      }
+
+      .timer-svg {
+        transform: rotate(-90deg);
+      }
+
+      .timer-circle {
+        fill: none;
+        stroke: #e5e7eb;
+        stroke-width: 8;
+      }
+
+      .timer-progress {
+        fill: none;
+        stroke: #d21d1d;
+        stroke-width: 8;
+        transition: stroke-dashoffset 0.1s linear;
+      }
+
+      .timer-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5rem;
+        font-family: monospace;
+        color: #0d0e11;
       }
 
       .stat-value {
@@ -66,10 +157,6 @@
         border-color: #d21d1d;
       }
 
-      .endgame {
-        text-align: center;
-      }
-
       button {
         background-color: #d59b2f;
         color: white;
@@ -92,9 +179,9 @@
       }
 
       .logo {
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: bold;
-        color: #d21d1d;
+        color: black;
         text-decoration: none;
         display: flex;
         align-items: center;
@@ -119,11 +206,54 @@
         background-color: #1d4ed8;
         transform: scale(1.1);
       }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-100px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal {
+        animation: slideIn 0.3s ease-out;
+      }
     </style>
   </head>
   <body>
     <div class="header">
       <a href="#" class="logo">🎮 ButtonClick</a>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h2>Game Over!</h2>
+        <div class="modal-content">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">Total Clicks</div>
+              <div class="stat-number" id="modalClicks">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Clicks per Second</div>
+              <div class="stat-number" id="modalCPS">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Time (seconds)</div>
+              <div class="stat-number" id="modalTime">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Accuracy</div>
+              <div class="stat-number" id="modalAccuracy">100%</div>
+            </div>
+          </div>
+        </div>
+        <button id="modalResetButton">Play Again</button>
+      </div>
     </div>
 
     <div class="box">
@@ -136,9 +266,12 @@
         <button class="time-button" data-time="50">50 sec</button>
       </div>
       <div class="stats">
-        <div>
-          <span class="stat-value" id="LeftoverTime">10</span>
-          secs
+        <div class="timer-container">
+          <svg class="timer-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle class="timer-circle" cx="50" cy="50" r="45"></circle>
+            <circle class="timer-progress" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="timer-text" id="LeftoverTime">10</div>
         </div>
         <div>
           <span class="stat-value" id="cps">0.0</span>
@@ -159,6 +292,9 @@
       const cpsDisplay = document.getElementById("cps");
       const title = document.getElementById("title");
       const timeOptions = document.getElementById("timeOptions");
+      const timerProgress = document.querySelector(".timer-progress");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalResetButton = document.getElementById("modalResetButton");
 
       let gameState = "idle";
       let LeftoverTime = 10;
@@ -166,24 +302,36 @@
       let clicks = 0;
       let timer = null;
 
-      // Time selection functionality
+      const circumference = 2 * Math.PI * 45;
+      timerProgress.style.strokeDasharray = `${circumference} ${circumference}`;
+      timerProgress.style.strokeDashoffset = 0;
+
+      function setProgress(progress) {
+        const offset = circumference - progress * circumference;
+        timerProgress.style.strokeDashoffset = offset;
+      }
+
+      function showModal(clicks, cps, time) {
+        document.getElementById("modalClicks").textContent = clicks;
+        document.getElementById("modalCPS").textContent = cps;
+        document.getElementById("modalTime").textContent = time;
+        document.getElementById("modalAccuracy").textContent = "100%";
+        modalOverlay.style.display = "flex";
+      }
+
       timeOptions.addEventListener("click", (e) => {
         if (
           e.target.classList.contains("time-button") &&
           gameState === "idle"
         ) {
-          // Remove selected class from all buttons
           document.querySelectorAll(".time-button").forEach((btn) => {
             btn.classList.remove("selected");
           });
-
-          // Add selected class to clicked button
           e.target.classList.add("selected");
-
-          // Update time
           totalTime = parseInt(e.target.dataset.time);
           LeftoverTime = totalTime;
           RemainingTimeonDisplay.textContent = LeftoverTime;
+          setProgress(1);
         }
       });
 
@@ -191,6 +339,7 @@
         const elapsedTime = totalTime - LeftoverTime;
         const cps = elapsedTime > 0 ? (clicks / elapsedTime).toFixed(1) : "0.0";
         cpsDisplay.textContent = cps;
+        return cps;
       }
 
       function getRandomColor() {
@@ -213,6 +362,7 @@
         timer = setInterval(() => {
           LeftoverTime--;
           RemainingTimeonDisplay.textContent = LeftoverTime;
+          setProgress(LeftoverTime / totalTime);
           updateCPS();
 
           if (LeftoverTime <= 0) {
@@ -225,27 +375,16 @@
         clearInterval(timer);
         gameState = "finished";
         clickZone.classList.remove("active");
+        clickZone.textContent = "Game Over!";
 
-        const finalCPS = (clicks / totalTime).toFixed(1);
-        clickZone.innerHTML = `
-          <div class="endgame">
-            <h2>Game Over!</h2>
-            <p>Final Score: ${clicks} clicks (${finalCPS} cps)</p>
-            <button id="resetButton">Try Again...</button>
-          </div>
-        `;
-
-        document
-          .getElementById("resetButton")
-          .addEventListener("click", (e) => {
-            e.stopPropagation();
-            resetGame();
-          });
+        const finalCPS = updateCPS();
+        showModal(clicks, finalCPS, totalTime);
       }
 
       function resetGame() {
         clearInterval(timer);
         timeOptions.style.display = "flex";
+        modalOverlay.style.display = "none";
 
         gameState = "idle";
         LeftoverTime = totalTime;
@@ -254,12 +393,15 @@
         RemainingTimeonDisplay.textContent = LeftoverTime;
         cpsDisplay.textContent = "0.0";
         clicksDisplay.textContent = clicks;
+        setProgress(1);
 
-        clickZone.innerHTML = "Click here to begin...";
+        clickZone.textContent = "Click here to begin...";
         clickZone.classList.remove("active");
 
         title.style.color = "#333";
       }
+
+      modalResetButton.addEventListener("click", resetGame);
 
       clickZone.addEventListener("click", (e) => {
         if (e.target === clickZone) {
